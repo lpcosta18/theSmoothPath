@@ -1,0 +1,1 @@
+Get-ChildItem -Recurse -File | Where-Object { $_.Name -like "*logo*" } | Select-Object FullName
