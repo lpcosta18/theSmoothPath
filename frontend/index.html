@@ -597,7 +597,7 @@
                         </a>
                     </div>
                 </div>
-                <!--
+                
                 <div class="fade-in">
                     <form id="contactForm" class="space-y-4">
                         <div>
@@ -607,6 +607,10 @@
                         <div>
                             <label for="email" class="block text-chocolate font-medium mb-2">Email *</label>
                             <input type="email" id="email" name="email" class="form-input" required>
+                        </div>
+                        <div>
+                            <label for="telefone" class="block text-chocolate font-medium mb-2">Contacto *</label>
+                            <input type="tel" id="telefone" name="telefone" class="form-input" required>
                         </div>
                         <div>
                             <label for="empresa" class="block text-chocolate font-medium mb-2">Empresa/Negócio</label>
@@ -630,7 +634,7 @@
                         <p class="font-medium">✕ Ocorreu um erro. Por favor tente novamente.</p>
                     </div>
                 </div>
-				-->
+				
             </div>
         </div>
     </section>
@@ -650,101 +654,229 @@
             </div>
         </div>
     </footer>
-
     <script>
-        lucide.createIcons();
-        
-        const header = document.getElementById('header');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 50) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
+        // =====================================================================
+        // 🔍 DEBUG MODE - Logging centralizado
+        // =====================================================================
+        const DEBUG = true;
+        const log = (...args) => DEBUG && console.log('[theSmoothPath]', ...args);
+        const error = (...args) => console.error('[theSmoothPath]', ...args);
+
+        // =====================================================================
+        // Inicialização de Ícones e UI
+        // =====================================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 DOMContentLoaded - Inicialização');
+            
+            // Icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+                log('✅ Ícones Lucide carregados');
             }
-        });
-        
-        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        const mobileMenu = document.getElementById('mobileMenu');
-        
-        mobileMenuBtn.addEventListener('click', () => {
-            mobileMenu.classList.toggle('active');
-        });
-        
-        mobileMenu.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                mobileMenu.classList.remove('active');
-            });
-        });
-        
-        const fadeElements = document.querySelectorAll('.fade-in');
-        
-        const observerOptions = {
-            root: null,
-            rootMargin: '0px',
-            threshold: 0.1
-        };
-        
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
+
+            // Header scroll effect
+            const header = document.getElementById('header');
+            const onScroll = () => {
+                if (!header) return;
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
                 }
+            };
+            window.addEventListener('scroll', onScroll);
+            log('✅ Header scroll listener ativo');
+
+            // Mobile menu
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+            if (mobileMenuBtn && mobileMenu) {
+                mobileMenuBtn.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('active');
+                    log('📱 Mobile menu toggle');
+                });
+                mobileMenu.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        mobileMenu.classList.remove('active');
+                    });
+                });
+            }
+
+            // Fade-in animations
+            const fadeElements = document.querySelectorAll('.fade-in');
+            if ('IntersectionObserver' in window) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('visible');
+                        }
+                    });
+                }, { threshold: 0.1 });
+                fadeElements.forEach(el => observer.observe(el));
+                log(`✅ Observer ativo para ${fadeElements.length} elementos`);
+            }
+
+            // Smooth scroll para âncoras
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        log(`🔗 Scroll para: ${this.getAttribute('href')}`);
+                    }
+                });
             });
-        }, observerOptions);
-        
-        fadeElements.forEach(element => {
-            observer.observe(element);
+
+            // =================================================================
+            // 📧 FORMULÁRIO DE CONTACTO - Lógica ÚNICA e Corrigida
+            // =================================================================
+            initContactForm();
         });
-        
-        const contactForm = document.getElementById('contactForm');
-        const formSuccess = document.getElementById('formSuccess');
-        const formError = document.getElementById('formError');
-        
-        contactForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const formData = new FormData(contactForm);
-            const data = Object.fromEntries(formData);
-            
-            if (!data.nome || !data.email || !data.mensagem || !data.privacidade) {
-                formError.style.display = 'block';
-                formSuccess.style.display = 'none';
-                setTimeout(() => {
-                    formError.style.display = 'none';
-                }, 5000);
+
+        function initContactForm() {
+            log('📧 initContactForm() chamado');
+
+            // Seletores CORRETOS (IDs exatos do HTML)
+            const contactForm = document.getElementById('contactForm');
+            const formSuccess = document.getElementById('formSuccess');
+            const formError = document.getElementById('formError');
+            const submitBtn = contactForm?.querySelector('button[type="submit"]');
+
+            // Validação crítica
+            if (!contactForm) {
+                error('❌ Formulário #contactForm NÃO encontrado!');
                 return;
             }
-            
-            try {
-                formSuccess.style.display = 'block';
-                formError.style.display = 'none';
-                contactForm.reset();
-                
-                setTimeout(() => {
-                    formSuccess.style.display = 'none';
-                }, 5000);
-            } catch (error) {
-                formError.style.display = 'block';
-                formSuccess.style.display = 'none';
-                setTimeout(() => {
-                    formError.style.display = 'none';
-                }, 5000);
+            if (!formSuccess || !formError) {
+                error('❌ Mensagens de feedback não encontradas!');
+                return;
             }
-        });
-        
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
+
+            log('✅ Elementos do formulário encontrados');
+            log('🔗 contactForm:', contactForm.id);
+            log('🔗 formSuccess:', formSuccess.id);
+            log('🔗 formError:', formError.id);
+
+            // URL da API (detecta ambiente)
+            // IMPORTANTE: Em desenvolvimento local, o Vercel usa porta 3000
+            // Se estiver a testar com servidor diferente, ajustar conforme necessário
+            const isLocalhost = window.location.hostname === 'localhost' ||
+                               window.location.hostname === '127.0.0.1';
+            const API_URL = isLocalhost
+                ? 'http://localhost:3000/api/contact'
+                : '/api/contact';
+            log('🌐 API_URL configurado:', API_URL, '(localhost:', isLocalhost, ')');
+
+            // Event listener ÚNICO para submit
+            contactForm.addEventListener('submit', async function(e) {
+                log('🚨 SUBMIT DISPARADO!');
+                
+                // ⚠️ CRÍTICO: Previne reload da página
                 e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
+                e.stopPropagation();
+                log('✅ preventDefault() e stopPropagation() chamados');
+
+                // Reset UI
+                formSuccess.style.display = 'none';
+                formError.style.display = 'none';
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'A enviar...';
+                    log('✏️ Botão desativado');
+                }
+
+                try {
+                    // Recolher dados
+                    const formData = new FormData(contactForm);
+                    const data = {
+                        nome: formData.get('nome')?.toString().trim() || '',
+                        email: formData.get('email')?.toString().trim() || '',
+                        empresa: formData.get('empresa')?.toString().trim() || '',
+                        telefone: formData.get('telefone')?.toString().trim() || '',
+                        mensagem: formData.get('mensagem')?.toString().trim() || '',
+                        privacidade: formData.get('privacidade') === 'on'
+                    };
+
+                    log('📦 Dados recolhidos:', {
+                        ...data,
+                        mensagem: data.mensagem?.substring(0, 50) + '...' // Truncar log
                     });
+
+                    // Validação de campos obrigatórios
+                    if (!data.nome || !data.email || !data.mensagem || !data.privacidade) {
+                        const missing = [];
+                        if (!data.nome) missing.push('nome');
+                        if (!data.email) missing.push('email');
+                        if (!data.mensagem) missing.push('mensagem');
+                        if (!data.privacidade) missing.push('privacidade');
+                        throw new Error(`Campos obrigatórios em falta: ${missing.join(', ')}`);
+                    }
+                    log('✅ Validação passou');
+
+                    // 🌐 FETCH PARA A API
+                    log('🚀 A iniciar fetch para:', API_URL);
+                    const fetchStart = Date.now();
+
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data),
+                        keepalive: true
+                    });
+
+                    const fetchDuration = Date.now() - fetchStart;
+                    log(`⏱️ Fetch completado em ${fetchDuration}ms`);
+                    log('📥 Resposta:', {
+                        status: response.status,
+                        statusText: response.statusText,
+                        ok: response.ok,
+                        type: response.type,
+                        url: response.url
+                    });
+
+// 🔄 Parsing seguro da resposta (evita "body stream already read")
+let result;
+try {
+  result = await response.json();
+} catch (parseErr) {
+  // Fallback se não for JSON
+  const raw = await response.clone().text().catch(() => 'Não foi ler resposta');
+  console.error('❌ Erro ao parsear:', parseErr.message, '| Raw:', raw.substring(0, 100));
+  throw new Error(`Resposta inválida (${response.status})`);
+}
+
+                    // Processar resultado
+                    if (response.ok && result?.success) {
+                        log('✅ SUCESSO REAL - email enviado');
+                        formSuccess.style.display = 'block';
+                        formSuccess.scrollIntoView({ behavior: 'smooth' });
+                        contactForm.reset();
+                        setTimeout(() => { formSuccess.style.display = 'none'; }, 5000);
+                    } else {
+                        log('❌ ERRO NA RESPOSTA:', result?.error || 'Unknown');
+                        throw new Error(result?.error || 'Erro ao processar pedido');
+                    }
+
+                } catch (err) {
+                    error('💥 ERRO NO CATCH:', err.name, err.message);
+                    if (err.stack) log('📋 Stack:', err.stack);
+                    
+                    formError.textContent = '✕ ' + (err.message || 'Erro desconhecido');
+                    formError.style.display = 'block';
+                    formError.scrollIntoView({ behavior: 'smooth' });
+                    setTimeout(() => { formError.style.display = 'none'; }, 5000);
+                } finally {
+                    log('🔄 Finally - a reativar botão');
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Enviar mensagem';
+                    }
                 }
             });
-        });
+
+            log('✅ Listener de submit adicionado com sucesso');
+        }
     </script>
 </body>
 </html>
-

@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "WebFetch(domain:thesmoothpath.pt)"
+      "Bash(curl -X POST https://api.resend.com/emails -H \"Authorization: Bearer re_LbdLcyNv_M2UgBTiC31dAfiQeib2SFpXc\" -H \"Content-Type: application/json\" -d '{\"from\": \"theSmoohPath <onboarding@resend.dev>\", \"to\": [\"luispintocosta@hotmail.com\"], \"subject\": \"Test\", \"text\": \"Test email\"}')",
+      "Bash(npm run:*)",
+      "Bash(vercel login:*)"
     ]
   }
 }
