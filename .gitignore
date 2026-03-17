@@ -11,6 +11,7 @@ vercel.json
 .vscode/
 .idea/
 .env
+.env.local
 dist/
 
 # Logs
